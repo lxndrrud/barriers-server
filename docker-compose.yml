@@ -1,0 +1,18 @@
+version: "3"
+services:
+    goserver: 
+        container_name: goserver
+        build:
+            context: ./goserver/
+            dockerfile: Dockerfile.dev
+        restart: unless-stopped
+        ports: 
+            - 8081:8081
+        networks:
+            - jmu_network
+        volumes:
+            - ./goserver:/go/src/goserver
+
+networks:
+    jmu_network:
+        external: true

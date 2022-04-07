@@ -1,0 +1,18 @@
+FROM golang:1.18-alpine
+
+COPY ./ /go/src/goserver
+WORKDIR /go/src/goserver
+
+ENV GOPATH=/go/src/backend/.go
+
+
+#RUN go mod init
+
+#COPY go.mod go.sum ./
+RUN go mod download
+#RUN go build app/main.go
+
+
+EXPOSE 8081
+
+CMD [ "go", "run", "main.go" ]
