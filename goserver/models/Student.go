@@ -3,13 +3,15 @@ package models
 import (
 	"database/sql"
 
-	"github.com/AcuVuz/barriers-server/interfaces"
 	"github.com/jmoiron/sqlx"
 )
 
 type Student struct {
-	interfaces.UserBase
-	SkudCard string `db:"skud_card"`
+	Id         int    `db:"id"`
+	Firstname  string `db:"firstname"`
+	Middlename string `db:"middlename"`
+	Lastname   string `db:"lastname"`
+	SkudCard   string `db:"skud_card"`
 }
 
 type Document struct {
