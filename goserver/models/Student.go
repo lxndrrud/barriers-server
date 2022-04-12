@@ -3,15 +3,13 @@ package models
 import (
 	"database/sql"
 
+	"github.com/AcuVuz/barriers-server/interfaces"
 	"github.com/jmoiron/sqlx"
 )
 
 type Student struct {
-	Id         int            `db:"id"`
-	Firstname  string         `db:"firstname"`
-	Middlename string         `db:"middlename"`
-	Lastname   string         `db:"lastname"`
-	SkudCard   sql.NullString `db:"skud_card"`
+	interfaces.UserBase
+	SkudCard string `db:"skud_card"`
 }
 
 type Document struct {
@@ -26,17 +24,17 @@ type StudentModel struct {
 	DB *sqlx.DB
 }
 
-func (m StudentModel) GetBySkudCard(SkudCard string) (*Student, error) {
-	student := Student{}
+func (m StudentModel) GetBySkudCard(SkudCard string) (Student, error) {
+	var student Student
 	err := m.DB.Get(&student,
-		`SELECT id, firstname, middlename, lastname FROM "education"."students" 
+		`SELECT id, firstname, middlename, lastname, skud_card FROM "education"."students" 
 			WHERE skud_card = $1`,
 		SkudCard)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return Student{}, nil
 	}
 	if err != nil {
-		return nil, err
+		return Student{}, err
 	}
-	return &student, nil
+	return student, nil
 }

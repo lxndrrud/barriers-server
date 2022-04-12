@@ -3,22 +3,20 @@ package models
 import (
 	"database/sql"
 
+	"github.com/AcuVuz/barriers-server/interfaces"
 	"github.com/jmoiron/sqlx"
 )
 
 type Person struct {
-	Id         int            `db:"id"`
-	Firstname  string         `db:"firstname"`
-	Middlename string         `db:"middlename"`
-	Lastname   string         `db:"lastname"`
-	SkudCard   sql.NullString `db:"skud_card"`
+	interfaces.UserBase
+	SkudCard string `db:"skud_card"`
 }
 
 type PersonModel struct {
 	DB *sqlx.DB
 }
 
-func (m PersonModel) GetBySkudCard(SkudCard string) (*Person, error) {
+func (m PersonModel) GetBySkudCard(SkudCard string) (Person, error) {
 	var person Person
 
 	err := m.DB.Get(&person,
@@ -26,11 +24,10 @@ func (m PersonModel) GetBySkudCard(SkudCard string) (*Person, error) {
 			WHERE skud_card = $1`,
 		SkudCard)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return Person{}, nil
 	}
 	if err != nil {
-		return nil, err
+		return Person{}, err
 	}
-
-	return &person, nil
+	return person, nil
 }
