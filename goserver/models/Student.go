@@ -7,7 +7,7 @@ import (
 )
 
 type Student struct {
-	Id         int    `db:"id"`
+	Id         int64  `db:"id"`
 	Firstname  string `db:"firstname"`
 	Middlename string `db:"middlename"`
 	Lastname   string `db:"lastname"`

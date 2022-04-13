@@ -6,30 +6,30 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Person struct {
-	Id         int    `db:"id"`
+type Employee struct {
+	Id         int64  `db:"id"`
 	Firstname  string `db:"firstname"`
 	Middlename string `db:"name"`
 	Lastname   string `db:"lastname"`
 	SkudCard   string `db:"skud_card"`
 }
 
-type PersonModel struct {
+type EmployeeModel struct {
 	DB *sqlx.DB
 }
 
-func (m PersonModel) GetBySkudCard(SkudCard string) (Person, error) {
-	var person Person
+func (m EmployeeModel) GetBySkudCard(SkudCard string) (Employee, error) {
+	var person Employee
 
 	err := m.DB.Get(&person,
 		`SELECT id, firstname, name, lastname, skud_card FROM "pers"."Persons"
 			WHERE skud_card = $1`,
 		SkudCard)
 	if err == sql.ErrNoRows {
-		return Person{}, nil
+		return Employee{}, nil
 	}
 	if err != nil {
-		return Person{}, err
+		return Employee{}, err
 	}
 	return person, nil
 }

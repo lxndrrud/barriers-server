@@ -19,14 +19,19 @@ func main() {
 
 	usersController := &controllers.UsersController{
 		UsersService: &services.UsersService{
-			Students: &models.StudentModel{DB: db},
-			Persons:  &models.PersonModel{DB: db},
+			Students:  &models.StudentModel{DB: db},
+			Employee:  &models.EmployeeModel{DB: db},
+			Movements: &models.MovementModel{DB: db},
 		},
 	}
 
 	app := gin.Default()
 
-	app.GET("/", usersController.Get)
+	usersRouter := app.Group("/users")
+	{
+		usersRouter.GET("/", usersController.Get)
+		usersRouter.POST("/action", usersController.MovementAction)
+	}
 
 	app.Run(":8081")
 
