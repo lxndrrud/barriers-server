@@ -18,10 +18,28 @@ type EmployeeModel struct {
 	DB *sqlx.DB
 }
 
+func (m EmployeeModel) Get(id int64) (Employee, error) {
+	var person Employee
+
+	err := m.DB.Get(
+		&person,
+		`SELECT id, firstname, name, lastname, skud_card FROM "pers"."Persons"
+			WHERE id = $1`,
+		id)
+	if err == sql.ErrNoRows {
+		return Employee{}, nil
+	}
+	if err != nil {
+		return Employee{}, err
+	}
+	return person, nil
+}
+
 func (m EmployeeModel) GetBySkudCard(SkudCard string) (Employee, error) {
 	var person Employee
 
-	err := m.DB.Get(&person,
+	err := m.DB.Get(
+		&person,
 		`SELECT id, firstname, name, lastname, skud_card FROM "pers"."Persons"
 			WHERE skud_card = $1`,
 		SkudCard)

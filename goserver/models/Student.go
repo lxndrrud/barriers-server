@@ -26,9 +26,26 @@ type StudentModel struct {
 	DB *sqlx.DB
 }
 
+func (m StudentModel) Get(id int64) (Student, error) {
+	var student Student
+	err := m.DB.Get(
+		&student,
+		`SELECT id, firstname, middlename, lastname, skud_card FROM "education"."students" 
+			WHERE id = $1`,
+		id)
+	if err == sql.ErrNoRows {
+		return Student{}, nil
+	}
+	if err != nil {
+		return Student{}, err
+	}
+	return student, nil
+}
+
 func (m StudentModel) GetBySkudCard(SkudCard string) (Student, error) {
 	var student Student
-	err := m.DB.Get(&student,
+	err := m.DB.Get(
+		&student,
 		`SELECT id, firstname, middlename, lastname, skud_card FROM "education"."students" 
 			WHERE skud_card = $1`,
 		SkudCard)
