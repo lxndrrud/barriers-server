@@ -12,5 +12,8 @@ func GetApp(db *sqlx.DB) *gin.Engine {
 	usersRouter := app.Group("/users")
 	SetupUsersRouter(usersRouter, db)
 
+	movementsRouter := app.Group("/movements")
+	SetupMovementsRouter(movementsRouter, db)
+
 	return app
 }

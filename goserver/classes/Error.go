@@ -1,4 +1,4 @@
-package interfaces
+package classes
 
 type CustomError struct {
 	Text string
