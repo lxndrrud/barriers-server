@@ -93,8 +93,9 @@ func (s MovementsService) MovementAction(idBuilding int64, event string, skudCar
 	return nil
 }
 
-func (s MovementsService) GetMovements(from string, to string) ([]classes.Movement, *classes.CustomError) {
+func (s MovementsService) GetMovements(from string, to string) ([]classes.MovementJSON, *classes.CustomError) {
 	dateUtil := &utils.Dates{}
+	var movementsJSON []classes.MovementJSON
 
 	now := time.Now()
 	parsedFrom := dateUtil.ParseWithDefault(from, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
@@ -104,13 +105,25 @@ func (s MovementsService) GetMovements(from string, to string) ([]classes.Moveme
 
 	movements, err := s.movements.GetMovements(parsedFrom, parsedTo)
 	if err != nil {
-		return movements, &classes.CustomError{
+		return movementsJSON, &classes.CustomError{
 			Text: "Внутренняя ошибка сервера при поиске перемещений!",
 			Code: http.StatusInternalServerError,
 		}
 	}
 
-	return movements, nil
+	for _, movement := range movements {
+		movementsJSON = append(movementsJSON, classes.MovementJSON{
+			Id:             movement.Id,
+			IdBuilding:     movement.IdBuilding,
+			IdEvent:        movement.IdEvent,
+			EventName:      movement.EventName,
+			EventTimestamp: movement.EventTimestamp,
+			IdStudent:      movement.IdStudent.Int64,
+			IdEmployee:     movement.IdEmployee.Int64,
+		})
+	}
+
+	return movementsJSON, nil
 }
 
 func (s MovementsService) GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.EmployeeMovement, *classes.CustomError) {

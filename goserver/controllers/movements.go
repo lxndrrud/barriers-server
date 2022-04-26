@@ -13,7 +13,7 @@ import (
 type MovementsController struct {
 	MovementsService interface {
 		MovementAction(idBuilding int64, event string, skudCard string) *classes.CustomError
-		GetMovements(from string, to string) ([]classes.Movement, *classes.CustomError)
+		GetMovements(from string, to string) ([]classes.MovementJSON, *classes.CustomError)
 		GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.EmployeeMovement, *classes.CustomError)
 		GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.StudentMovement, *classes.CustomError)
 	}
@@ -64,6 +64,11 @@ func (c MovementsController) GetMovements(ctx *gin.Context) {
 			"error": errService.Text,
 		})
 		errService = nil
+		return
+	}
+
+	if len(movementsQuery) == 0 {
+		ctx.JSON(http.StatusOK, []classes.Movement{})
 		return
 	}
 
