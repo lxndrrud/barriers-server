@@ -30,9 +30,9 @@ func CreateUsersService(db *sqlx.DB) *UsersService {
 	}
 }
 
-func (s UsersService) GetBySkudCard(SkudCard string) (classes.Student, classes.Employee, *classes.CustomError) {
+func (s UsersService) GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError) {
 	studentChan := make(chan classes.Student)
-	personChan := make(chan classes.Employee)
+	employeeChan := make(chan classes.Employee)
 	errChan := make(chan error)
 
 	go func() {
@@ -43,20 +43,27 @@ func (s UsersService) GetBySkudCard(SkudCard string) (classes.Student, classes.E
 
 	go func() {
 		value, err := s.employee.GetBySkudCard(SkudCard)
-		personChan <- value
+		employeeChan <- value
 		errChan <- err
 	}()
 
 	student := <-studentChan
-	person := <-personChan
+	employee := <-employeeChan
 	err := <-errChan
 
 	if err != nil {
-		return classes.Student{}, classes.Employee{}, &classes.CustomError{
+		return classes.UserJSON{}, &classes.CustomError{
 			Text: err.Error(),
 			Code: http.StatusInternalServerError,
 		}
 	}
 
-	return student, person, nil
+	if student.Id != 0 {
+		return classes.CreateUserJSONFromStudent(&student), nil
+	} else if employee.Id != 0 {
+		return classes.CreateUserJSONFromEmployee(&employee), nil
+	} else {
+		return classes.UserJSON{}, nil
+	}
+
 }

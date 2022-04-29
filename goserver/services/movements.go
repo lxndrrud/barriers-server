@@ -13,7 +13,7 @@ import (
 type MovementsService struct {
 	db           *sqlx.DB
 	usersService interface {
-		GetBySkudCard(SkudCard string) (classes.Student, classes.Employee, *classes.CustomError)
+		GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError)
 	}
 	movements interface {
 		GetMovements(from time.Time, to time.Time) ([]classes.Movement, error)
@@ -33,12 +33,12 @@ func CreateMovementsService(db *sqlx.DB) *MovementsService {
 }
 
 func (s MovementsService) MovementAction(idBuilding int64, event string, skudCard string) *classes.CustomError {
-	student, employee, err := s.usersService.GetBySkudCard(skudCard)
+	user, err := s.usersService.GetBySkudCard(skudCard)
 	if err != nil {
 		return err
 	}
 
-	if student.User.Id == 0 && employee.User.Id == 0 {
+	if user.Id == 0 {
 		return &classes.CustomError{
 			Text: "Пользователь не найден!",
 			Code: http.StatusNotFound,
@@ -65,16 +65,16 @@ func (s MovementsService) MovementAction(idBuilding int64, event string, skudCar
 		}
 	}
 
-	if student.User.Id != 0 {
-		_, err := s.movements.InsertForStudent(trx, idBuilding, idEvent, student.User.Id)
+	if user.Type == "student" {
+		_, err := s.movements.InsertForStudent(trx, idBuilding, idEvent, user.Id)
 		if err != nil {
 			return &classes.CustomError{
 				Text: err.Error(),
 				Code: http.StatusInternalServerError,
 			}
 		}
-	} else if employee.User.Id != 0 {
-		_, err := s.movements.InsertForEmployee(trx, idBuilding, idEvent, employee.User.Id)
+	} else if user.Type == "employee" {
+		_, err := s.movements.InsertForEmployee(trx, idBuilding, idEvent, user.Id)
 		if err != nil {
 			return &classes.CustomError{
 				Text: err.Error(),

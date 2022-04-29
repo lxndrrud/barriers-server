@@ -11,7 +11,7 @@ import (
 
 type UsersController struct {
 	UsersService interface {
-		GetBySkudCard(SkudCard string) (classes.Student, classes.Employee, *classes.CustomError)
+		GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError)
 	}
 }
 
@@ -22,28 +22,17 @@ func CreateUsersController(db *sqlx.DB) *UsersController {
 }
 
 func (c UsersController) GetBySkudCard(ctx *gin.Context) {
-	student, employee, err := c.UsersService.GetBySkudCard(ctx.Query("skud_card"))
+	user, err := c.UsersService.GetBySkudCard(ctx.Query("skud_card"))
 	if err != nil {
 		ctx.JSON(err.Code, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	if student.Id != 0 {
-		ctx.JSON(http.StatusOK, gin.H{
-			"student":  student.User,
-			"employee": nil,
-		})
-	} else if employee.Id != 0 {
-		ctx.JSON(http.StatusOK, gin.H{
-			"student":  nil,
-			"employee": employee.User,
-		})
+	if user.Id != 0 {
+		ctx.JSON(http.StatusOK, user)
 	} else {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"student":  nil,
-			"employee": nil,
-		})
+		ctx.JSON(http.StatusNotFound, user)
 	}
 
 }
