@@ -67,8 +67,8 @@ func (m MovementModel) GetMovements(from time.Time, to time.Time) ([]classes.Mov
 	return movements, nil
 }
 
-func (m MovementModel) GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.EmployeeMovement, error) {
-	var movements []classes.EmployeeMovement
+func (m MovementModel) GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error) {
+	var movements []classes.DatabaseEmployeeMovement
 
 	err := m.DB.Select(
 		&movements,
@@ -86,8 +86,8 @@ func (m MovementModel) GetMovementsForEmployee(idEmployee int64, from time.Time,
 	return movements, nil
 }
 
-func (m MovementModel) GetMovementsForStudent(idStudent int64, from time.Time, to time.Time) ([]classes.StudentMovement, error) {
-	var movements []classes.StudentMovement
+func (m MovementModel) GetMovementsForStudent(idStudent int64, from time.Time, to time.Time) ([]classes.DatabaseStudentMovement, error) {
+	var movements []classes.DatabaseStudentMovement
 
 	err := m.DB.Select(
 		&movements,

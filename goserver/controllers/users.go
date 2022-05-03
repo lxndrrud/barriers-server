@@ -32,7 +32,9 @@ func (c UsersController) GetBySkudCard(ctx *gin.Context) {
 	if user.Id != 0 {
 		ctx.JSON(http.StatusOK, user)
 	} else {
-		ctx.JSON(http.StatusNotFound, user)
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "Пользователь не найден!",
+		})
 	}
 
 }

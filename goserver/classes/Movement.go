@@ -25,12 +25,62 @@ type MovementJSON struct {
 	IdEmployee     int64     `json:"id_employee"`
 }
 
-type StudentMovement struct {
+type DatabaseStudentMovement struct {
 	Movement
 	UserBase
 }
 
-type EmployeeMovement struct {
+type JSONStudentMovement struct {
+	MovementJSON
+	UserJSONBase
+}
+
+func CreateJSONFromStudentMovement(dbMovement *DatabaseStudentMovement) JSONStudentMovement {
+	return JSONStudentMovement{
+		UserJSONBase: UserJSONBase{
+			Firstname:  dbMovement.Firstname,
+			Middlename: dbMovement.Middlename,
+			Lastname:   dbMovement.Lastname,
+			SkudCard:   dbMovement.SkudCard.String,
+		},
+		MovementJSON: MovementJSON{
+			Id:             dbMovement.Id,
+			IdEvent:        dbMovement.IdEvent,
+			IdBuilding:     dbMovement.IdBuilding,
+			IdStudent:      0,
+			IdEmployee:     dbMovement.IdEmployee.Int64,
+			EventName:      dbMovement.EventName,
+			EventTimestamp: dbMovement.EventTimestamp,
+		},
+	}
+}
+
+type DatabaseEmployeeMovement struct {
 	Movement
 	UserBase
+}
+
+type JSONEmployeeMovement struct {
+	MovementJSON
+	UserJSONBase
+}
+
+func CreateJSONFromEmployeeMovement(dbMovement *DatabaseEmployeeMovement) JSONEmployeeMovement {
+	return JSONEmployeeMovement{
+		UserJSONBase: UserJSONBase{
+			Firstname:  dbMovement.Firstname,
+			Middlename: dbMovement.Middlename,
+			Lastname:   dbMovement.Lastname,
+			SkudCard:   dbMovement.SkudCard.String,
+		},
+		MovementJSON: MovementJSON{
+			Id:             dbMovement.Id,
+			IdEvent:        dbMovement.IdEvent,
+			IdBuilding:     dbMovement.IdBuilding,
+			IdStudent:      0,
+			IdEmployee:     dbMovement.IdEmployee.Int64,
+			EventName:      dbMovement.EventName,
+			EventTimestamp: dbMovement.EventTimestamp,
+		},
+	}
 }

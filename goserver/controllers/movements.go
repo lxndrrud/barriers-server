@@ -14,8 +14,8 @@ type MovementsController struct {
 	MovementsService interface {
 		MovementAction(idBuilding int64, event string, skudCard string) *classes.CustomError
 		GetMovements(from string, to string) ([]classes.MovementJSON, *classes.CustomError)
-		GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.EmployeeMovement, *classes.CustomError)
-		GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.StudentMovement, *classes.CustomError)
+		GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError)
+		GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError)
 	}
 }
 
