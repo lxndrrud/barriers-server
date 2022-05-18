@@ -16,7 +16,7 @@ type MovementsService struct {
 		GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError)
 	}
 	movements interface {
-		GetMovements(from time.Time, to time.Time) ([]classes.Movement, error)
+		GetMovements(from time.Time, to time.Time) ([]classes.DatabaseMovement, error)
 		InsertForStudent(trx *sqlx.Tx, idBuilding int64, idEvent int64, idStudent int64) (int64, error)
 		InsertForEmployee(trx *sqlx.Tx, idBuilding int64, idEvent int64, idEmployee int64) (int64, error)
 		GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error)
@@ -50,6 +50,8 @@ func (s MovementsService) MovementAction(idBuilding int64, event string, skudCar
 		idEvent = 1
 	} else if event == "exit" {
 		idEvent = 2
+	} else if event == "fail" {
+		idEvent = 3
 	} else {
 		return &classes.CustomError{
 			Text: "Неверно указан тип события!",
@@ -93,9 +95,9 @@ func (s MovementsService) MovementAction(idBuilding int64, event string, skudCar
 	return nil
 }
 
-func (s MovementsService) GetMovements(from string, to string) ([]classes.MovementJSON, *classes.CustomError) {
+func (s MovementsService) GetMovements(from string, to string) ([]classes.JSONMovement, *classes.CustomError) {
 	dateUtil := &utils.Dates{}
-	var movementsJSON []classes.MovementJSON
+	var movementsJSON []classes.JSONMovement
 
 	now := time.Now()
 	parsedFrom := dateUtil.ParseWithDefault(from, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
@@ -112,15 +114,21 @@ func (s MovementsService) GetMovements(from string, to string) ([]classes.Moveme
 	}
 
 	for _, movement := range movements {
-		movementsJSON = append(movementsJSON, classes.MovementJSON{
-			Id:             movement.Id,
-			IdBuilding:     movement.IdBuilding,
-			IdEvent:        movement.IdEvent,
-			EventName:      movement.EventName,
-			EventTimestamp: movement.EventTimestamp,
-			IdStudent:      movement.IdStudent.Int64,
-			IdEmployee:     movement.IdEmployee.Int64,
-		})
+		/*
+			movementsJSON = append(movementsJSON, classes.MovementJSON{
+				Id:             movement.Id,
+				IdBuilding:     movement.IdBuilding,
+				IdEvent:        movement.IdEvent,
+				EventName:      movement.EventName,
+				EventTimestamp: movement.EventTimestamp,
+				IdStudent:      movement.IdStudent.Int64,
+				IdEmployee:     movement.IdEmployee.Int64,
+			})
+		*/
+		toAppend := classes.CreateJSONMovementFromDatabaseMovement(&movement)
+		if toAppend.Id != 0 {
+			movementsJSON = append(movementsJSON, classes.CreateJSONMovementFromDatabaseMovement(&movement))
+		}
 	}
 
 	return movementsJSON, nil

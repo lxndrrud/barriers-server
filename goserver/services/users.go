@@ -67,3 +67,11 @@ func (s UsersService) GetBySkudCard(SkudCard string) (classes.UserJSON, *classes
 	}
 
 }
+
+func (s UsersService) GetStudentInfo(IdStudent int64) {
+
+}
+
+func (s UsersService) GetEmployeeInfo(IdEmployee int64) {
+
+}

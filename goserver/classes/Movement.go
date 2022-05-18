@@ -8,6 +8,7 @@ import (
 type Movement struct {
 	Id             int64         `db:"id" json:"id"`
 	IdBuilding     int64         `db:"id_building" json:"id_building"`
+	BuildingName   string        `db:"building_name" json:"building_name"`
 	IdEvent        int64         `db:"id_event" json:"id_event"`
 	EventName      string        `db:"event_name" json:"event_name"`
 	EventTimestamp time.Time     `db:"event_time" json:"event_timestamp"`
@@ -18,6 +19,7 @@ type Movement struct {
 type MovementJSON struct {
 	Id             int64     `json:"id"`
 	IdBuilding     int64     `json:"id_building"`
+	BuildingName   string    `json:"building_name"`
 	IdEvent        int64     `json:"id_event"`
 	EventName      string    `json:"event_name"`
 	EventTimestamp time.Time `json:"event_timestamp"`
@@ -47,6 +49,7 @@ func CreateJSONFromStudentMovement(dbMovement *DatabaseStudentMovement) JSONStud
 			Id:             dbMovement.Id,
 			IdEvent:        dbMovement.IdEvent,
 			IdBuilding:     dbMovement.IdBuilding,
+			BuildingName:   dbMovement.BuildingName,
 			IdStudent:      0,
 			IdEmployee:     dbMovement.IdEmployee.Int64,
 			EventName:      dbMovement.EventName,
@@ -77,10 +80,65 @@ func CreateJSONFromEmployeeMovement(dbMovement *DatabaseEmployeeMovement) JSONEm
 			Id:             dbMovement.Id,
 			IdEvent:        dbMovement.IdEvent,
 			IdBuilding:     dbMovement.IdBuilding,
+			BuildingName:   dbMovement.BuildingName,
 			IdStudent:      0,
 			IdEmployee:     dbMovement.IdEmployee.Int64,
 			EventName:      dbMovement.EventName,
 			EventTimestamp: dbMovement.EventTimestamp,
 		},
 	}
+}
+
+type DatabaseMovement struct {
+	Movement
+	EmployeeBase
+	StudentBase
+}
+
+type JSONMovement struct {
+	MovementJSON
+	UserJSONBase
+}
+
+func CreateJSONMovementFromDatabaseMovement(dbMovement *DatabaseMovement) JSONMovement {
+	if dbMovement.IdStudent.Valid {
+		return JSONMovement{
+			MovementJSON: MovementJSON{
+				Id:             dbMovement.Id,
+				IdEvent:        dbMovement.IdEvent,
+				IdBuilding:     dbMovement.IdBuilding,
+				BuildingName:   dbMovement.BuildingName,
+				IdStudent:      dbMovement.IdStudent.Int64,
+				IdEmployee:     0,
+				EventName:      dbMovement.EventName,
+				EventTimestamp: dbMovement.EventTimestamp,
+			},
+			UserJSONBase: UserJSONBase{
+				Firstname:  dbMovement.StudentBase.Firstname.String,
+				Middlename: dbMovement.StudentBase.Middlename.String,
+				Lastname:   dbMovement.StudentBase.Lastname.String,
+				SkudCard:   dbMovement.StudentBase.SkudCard.String,
+			},
+		}
+	} else if dbMovement.IdEmployee.Valid {
+		return JSONMovement{
+			MovementJSON: MovementJSON{
+				Id:             dbMovement.Id,
+				IdEvent:        dbMovement.IdEvent,
+				IdBuilding:     dbMovement.IdBuilding,
+				BuildingName:   dbMovement.BuildingName,
+				IdStudent:      0,
+				IdEmployee:     dbMovement.IdEmployee.Int64,
+				EventName:      dbMovement.EventName,
+				EventTimestamp: dbMovement.EventTimestamp,
+			},
+			UserJSONBase: UserJSONBase{
+				Firstname:  dbMovement.EmployeeBase.Firstname.String,
+				Middlename: dbMovement.EmployeeBase.Middlename.String,
+				Lastname:   dbMovement.EmployeeBase.Lastname.String,
+				SkudCard:   dbMovement.EmployeeBase.SkudCard.String,
+			},
+		}
+	}
+	return JSONMovement{}
 }

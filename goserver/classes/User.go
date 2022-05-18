@@ -9,6 +9,20 @@ type UserBase struct {
 	SkudCard   sql.NullString `db:"skud_card"`
 }
 
+type EmployeeBase struct {
+	Firstname  sql.NullString `db:"employee_firstname"`
+	Middlename sql.NullString `db:"employee_middlename"`
+	Lastname   sql.NullString `db:"employee_lastname"`
+	SkudCard   sql.NullString `db:"employee_skud_card"`
+}
+
+type StudentBase struct {
+	Firstname  sql.NullString `db:"student_firstname"`
+	Middlename sql.NullString `db:"student_middlename"`
+	Lastname   sql.NullString `db:"student_lastname"`
+	SkudCard   sql.NullString `db:"student_skud_card"`
+}
+
 type UserJSONBase struct {
 	Firstname  string `json:"firstname"`
 	Middlename string `json:"middlename"`
