@@ -22,7 +22,7 @@ func (d Dates) ParseWithDefault(input string, defaultValue time.Time) time.Time 
 	Date := strings.Split(datetimeList[0], ".")
 	Time := strings.Split(datetimeList[1], ":")
 
-	if len(Date) != 3 || len(Time) != 3 {
+	if len(Date) != 3 || len(Time) != 2 {
 		return defaultValue
 	}
 
@@ -51,5 +51,5 @@ func (d Dates) ParseWithDefault(input string, defaultValue time.Time) time.Time 
 	}
 
 	return time.Date(convertedDateList[2], time.Month(convertedDateList[1]), convertedDateList[0],
-		convertedTimeList[0], convertedTimeList[1], convertedTimeList[2], 0, location)
+		convertedTimeList[0], convertedTimeList[1], 0, 0, location)
 }
