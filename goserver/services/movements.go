@@ -135,7 +135,7 @@ func (s MovementsService) GetMovements(from string, to string) ([]classes.JSONMo
 }
 
 func (s MovementsService) GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError) {
-	var movements []classes.JSONEmployeeMovement
+	movements := make([]classes.JSONEmployeeMovement, 0)
 
 	dateUtil := &utils.Dates{}
 
@@ -147,7 +147,7 @@ func (s MovementsService) GetMovementsForEmployee(idEmployee int64, from string,
 
 	DBmovements, err := s.movements.GetMovementsForEmployee(idEmployee, parsedFrom, parsedTo)
 	if err != nil {
-		return []classes.JSONEmployeeMovement{}, &classes.CustomError{
+		return movements, &classes.CustomError{
 			Text: "Внутренняя ошибка сервера при поиске перемещений для работника!",
 			Code: http.StatusInternalServerError,
 		}
@@ -161,7 +161,7 @@ func (s MovementsService) GetMovementsForEmployee(idEmployee int64, from string,
 }
 
 func (s MovementsService) GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError) {
-	var movements []classes.JSONStudentMovement
+	movements := make([]classes.JSONStudentMovement, 0)
 
 	var parsedFrom time.Time
 	var parsedTo time.Time

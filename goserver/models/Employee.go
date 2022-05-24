@@ -11,21 +11,39 @@ type EmployeeModel struct {
 	DB *sqlx.DB
 }
 
-func (m EmployeeModel) Get(id int64) (classes.Employee, error) {
-	var person classes.Employee
+func (m EmployeeModel) Get(id int64) (classes.DBEmployeePersonalInfo, error) {
+	var employee classes.DBEmployeePersonalInfo
 
 	err := m.DB.Get(
-		&person,
+		&employee,
 		`SELECT id, firstname as lastname, name as firstname, lastname as middlename, skud_card FROM pers."Persons"
 			WHERE id = $1`,
 		id)
-	if err == sql.ErrNoRows {
-		return classes.Employee{}, nil
-	}
+
 	if err != nil {
-		return classes.Employee{}, err
+		return classes.DBEmployeePersonalInfo{}, err
 	}
-	return person, nil
+	return employee, nil
+}
+
+func (m EmployeeModel) GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo, error) {
+	positionsInfo := make([]classes.DBEmployeePositionInfo, 0)
+
+	err := m.DB.Select(
+		&positionsInfo,
+		`SELECT pos.id, typepos.name_position as title, name_department as department_title, 
+			date_drop FROM pers."PersonsPosition" perspos
+		JOIN pers."Position" AS pos ON pos.id = perspos.id_position
+		JOIN pers."Departments" AS dep ON dep.id = pos.id_department
+		JOIN pers."TypePositions" AS typepos ON typepos.id = pos.id_type
+		WHERE perspos.id_person = $1`,
+		IdEmployee)
+
+	if err != nil {
+		return positionsInfo, err
+	}
+
+	return positionsInfo, nil
 }
 
 func (m EmployeeModel) GetBySkudCard(SkudCard string) (classes.Employee, error) {
