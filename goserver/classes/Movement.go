@@ -27,6 +27,19 @@ type MovementJSON struct {
 	IdEmployee     int64     `json:"id_employee"`
 }
 
+func CreateJSONFromMovement(dbMovement *Movement) MovementJSON {
+	return MovementJSON{
+		Id:             dbMovement.Id,
+		IdBuilding:     dbMovement.IdBuilding,
+		BuildingName:   dbMovement.BuildingName,
+		IdEvent:        dbMovement.IdEvent,
+		EventName:      dbMovement.EventName,
+		EventTimestamp: dbMovement.EventTimestamp,
+		IdStudent:      dbMovement.IdStudent.Int64,
+		IdEmployee:     dbMovement.IdEmployee.Int64,
+	}
+}
+
 type DatabaseStudentMovement struct {
 	Movement
 	UserBase

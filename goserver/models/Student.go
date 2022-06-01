@@ -48,7 +48,8 @@ func (m StudentModel) GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupIn
 		`SELECT g.id, g.nickname as title, g.course, 
 			dep.name_department as department_title 
 		FROM education.students_groups sg
-		JOIN education.study_groups as g
+		JOIN education.study_groups AS g ON g.id = sg.id_group 
+		LEFT JOIN pers."Departments" AS dep ON dep.id = g.id_faculty
 		WHERE sg.id_student = $1`,
 		IdStudent)
 

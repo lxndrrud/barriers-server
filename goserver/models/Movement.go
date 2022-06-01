@@ -93,12 +93,13 @@ func (m MovementModel) GetMovements(from time.Time, to time.Time) ([]classes.Dat
 	return movements, nil
 }
 
+/*
 func (m MovementModel) GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error) {
 	var movements []classes.DatabaseEmployeeMovement
 
 	err := m.DB.Select(
 		&movements,
-		`SELECT m.id, m.id_building, m.id_event, e.name as event_name, m.event_time, 
+		`SELECT m.id, m.id_building, m.id_event, e.name as event_name, m.event_time,
 		m.id_employee, p.firstname as lastname, p.name as firstname, p.lastname as middlename, p.skud_card
 		FROM barriers.moves m
 		JOIN barriers.events AS e ON  e.id = m.id_event
@@ -117,8 +118,8 @@ func (m MovementModel) GetMovementsForStudent(idStudent int64, from time.Time, t
 
 	err := m.DB.Select(
 		&movements,
-		`SELECT m.id, m.id_building, m.id_event, e.name as event_name, m.event_time, 
-		m.id_student, s.firstname, s.middlename, s.lastname, s.skud_card  
+		`SELECT m.id, m.id_building, m.id_event, e.name as event_name, m.event_time,
+		m.id_student, s.firstname, s.middlename, s.lastname, s.skud_card
 		FROM barriers.moves m
 		JOIN barriers.events AS e ON e.id = m.id_event
 		JOIN education.students AS s ON s.id = m.id_student
@@ -129,4 +130,45 @@ func (m MovementModel) GetMovementsForStudent(idStudent int64, from time.Time, t
 		return movements, err
 	}
 	return movements, nil
+}
+*/
+
+func (m MovementModel) GetMovementsForUser(idStudent, idEmployee int64, from time.Time, to time.Time) ([]classes.Movement, error) {
+	movements := make([]classes.Movement, 0)
+
+	if idStudent != 0 {
+		err := m.DB.Select(
+			&movements,
+			`SELECT m.id, m.id_building, m.id_event, m.event_time, m.id_student, m.id_employee,
+			e.name as event_name,
+			b.name as building_name
+			FROM barriers.moves m
+			JOIN barriers.events AS e ON e.id = m.id_event
+			JOIN barriers.buildings AS b ON b.id = m.id_building
+			WHERE m.id_student = $1 AND (event_time >= $2 AND event_time <= $3)`,
+			idStudent, from, to)
+		if err != nil {
+			fmt.Println(err)
+			return movements, err
+		}
+
+	} else if idEmployee != 0 {
+		err := m.DB.Select(
+			&movements,
+			`SELECT m.id, m.id_building, m.id_event, m.event_time, m.id_student, m.id_employee,
+			e.name as event_name,
+			b.name as building_name
+			FROM barriers.moves m
+			JOIN barriers.events AS e ON e.id = m.id_event
+			JOIN barriers.buildings AS b ON b.id = m.id_building
+			WHERE m.id_employee = $1 AND (event_time >= $2 AND event_time <= $3)`,
+			idEmployee, from, to)
+		if err != nil {
+			fmt.Println(err)
+			return movements, err
+		}
+	}
+
+	return movements, nil
+
 }

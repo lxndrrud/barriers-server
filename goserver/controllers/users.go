@@ -15,6 +15,8 @@ type UsersController struct {
 		GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError)
 		GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployeePersonalInfo, []classes.JSONEmployeePositionInfo,
 			*classes.CustomError)
+		GetStudentInfo(IdStudent int64) (classes.JSONStudentPersonalInfo,
+			[]classes.JSONStudentGroupInfo, *classes.CustomError)
 	}
 }
 
@@ -59,5 +61,25 @@ func (c UsersController) GetEmployeeInfo(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"employee":  personalInfo,
 		"positions": positionsInfo,
+	})
+}
+
+func (c UsersController) GetStudentInfo(ctx *gin.Context) {
+	idStudent, err := strconv.ParseInt(ctx.Query("id_student"), 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Ошибка при определении идентификатора работника!",
+		})
+		return
+	}
+	personalInfo, groupsInfo, errService := c.UsersService.GetStudentInfo(idStudent)
+	if errService != nil {
+		ctx.JSON(errService.Code, errService.Text)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"student": personalInfo,
+		"groups":  groupsInfo,
 	})
 }

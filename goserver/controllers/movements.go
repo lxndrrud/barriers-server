@@ -14,8 +14,9 @@ type MovementsController struct {
 	MovementsService interface {
 		MovementAction(idBuilding int64, event string, skudCard string) *classes.CustomError
 		GetMovements(from string, to string) ([]classes.JSONMovement, *classes.CustomError)
-		GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError)
-		GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError)
+		//GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError)
+		//GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError)
+		GetMovementsForUser(idEmployee, idStudent int64, from, to string) ([]classes.MovementJSON, *classes.CustomError)
 	}
 }
 
@@ -76,6 +77,7 @@ func (c MovementsController) GetMovements(ctx *gin.Context) {
 
 }
 
+/*
 func (c MovementsController) GetMovementsForEmployee(ctx *gin.Context) {
 	from := ctx.Query("from")
 	to := ctx.Query("to")
@@ -120,4 +122,30 @@ func (c MovementsController) GetMovementsForStudent(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, movementsQuery)
+}
+*/
+
+func (c MovementsController) GetMovementsForUser(ctx *gin.Context) {
+	from := ctx.Query("from")
+	to := ctx.Query("to")
+
+	idStudent, err := strconv.ParseInt(ctx.Query("id_student"), 10, 64)
+	if err != nil {
+		idStudent = 0
+	}
+
+	idEmployee, err := strconv.ParseInt(ctx.Query("id_employee"), 10, 64)
+	if err != nil {
+		idEmployee = 0
+	}
+
+	movements, errService := c.MovementsService.GetMovementsForUser(idEmployee, idStudent, from, to)
+	if errService != nil {
+		ctx.JSON(errService.Code, errService.Text)
+		errService = nil
+		return
+	}
+
+	ctx.JSON(http.StatusOK, movements)
+
 }

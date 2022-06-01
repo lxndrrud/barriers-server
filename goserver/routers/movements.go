@@ -11,7 +11,10 @@ func SetupMovementsRouter(usersRouter *gin.RouterGroup, db *sqlx.DB) {
 
 	usersRouter.POST("/action", movementsController.MovementAction)
 	usersRouter.GET("/", movementsController.GetMovements)
-	usersRouter.GET("/employee", movementsController.GetMovementsForEmployee)
-	usersRouter.GET("/student", movementsController.GetMovementsForStudent)
+	/*
+		usersRouter.GET("/employee", movementsController.GetMovementsForEmployee)
+		usersRouter.GET("/student", movementsController.GetMovementsForStudent)
+	*/
+	usersRouter.GET("/user", movementsController.GetMovementsForUser)
 
 }

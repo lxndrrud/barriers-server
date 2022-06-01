@@ -13,5 +13,5 @@ func SetupUsersRouter(usersRouter *gin.RouterGroup, db *sqlx.DB) {
 	usersRouter.GET("/employee", usersController.GetEmployeeInfo)
 
 	// TODO Доделать эту штуку для студента
-	// TODO usersRouter.GET("/student", usersController.GetStudentInfo)
+	usersRouter.GET("/student", usersController.GetStudentInfo)
 }

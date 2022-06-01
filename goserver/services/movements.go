@@ -19,8 +19,9 @@ type MovementsService struct {
 		GetMovements(from time.Time, to time.Time) ([]classes.DatabaseMovement, error)
 		InsertForStudent(trx *sqlx.Tx, idBuilding int64, idEvent int64, idStudent int64) (int64, error)
 		InsertForEmployee(trx *sqlx.Tx, idBuilding int64, idEvent int64, idEmployee int64) (int64, error)
-		GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error)
-		GetMovementsForStudent(idStudent int64, from time.Time, to time.Time) ([]classes.DatabaseStudentMovement, error)
+		//GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error)
+		//GetMovementsForStudent(idStudent int64, from time.Time, to time.Time) ([]classes.DatabaseStudentMovement, error)
+		GetMovementsForUser(idStudent, idEmployee int64, from time.Time, to time.Time) ([]classes.Movement, error)
 	}
 }
 
@@ -134,6 +135,7 @@ func (s MovementsService) GetMovements(from string, to string) ([]classes.JSONMo
 	return movementsJSON, nil
 }
 
+/*
 func (s MovementsService) GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError) {
 	movements := make([]classes.JSONEmployeeMovement, 0)
 
@@ -184,6 +186,36 @@ func (s MovementsService) GetMovementsForStudent(idStudent int64, from string, t
 
 	for _, movement := range DBmovements {
 		movements = append(movements, classes.CreateJSONFromStudentMovement(&movement))
+	}
+
+	return movements, nil
+}
+*/
+
+func (s MovementsService) GetMovementsForUser(idEmployee, idStudent int64, from, to string) ([]classes.MovementJSON, *classes.CustomError) {
+	movements := make([]classes.MovementJSON, 0)
+
+	var parsedFrom time.Time
+	var parsedTo time.Time
+
+	dateUtil := &utils.Dates{}
+
+	now := time.Now()
+	parsedFrom = dateUtil.ParseWithDefault(from, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
+	parsedTo = dateUtil.ParseWithDefault(to, now.AddDate(0, 0, 1))
+
+	dateUtil = nil
+
+	DBmovements, err := s.movements.GetMovementsForUser(idStudent, idEmployee, parsedFrom, parsedTo)
+	if err != nil {
+		return movements, &classes.CustomError{
+			Code: 500,
+			Text: err.Error(),
+		}
+	}
+
+	for _, movement := range DBmovements {
+		movements = append(movements, classes.CreateJSONFromMovement(&movement))
 	}
 
 	return movements, nil
