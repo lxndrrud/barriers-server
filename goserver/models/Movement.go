@@ -145,7 +145,8 @@ func (m MovementModel) GetMovementsForUser(idStudent, idEmployee int64, from tim
 			FROM barriers.moves m
 			JOIN barriers.events AS e ON e.id = m.id_event
 			JOIN barriers.buildings AS b ON b.id = m.id_building
-			WHERE m.id_student = $1 AND (event_time >= $2 AND event_time <= $3)`,
+			WHERE m.id_student = $1 AND (event_time >= $2 AND event_time <= $3)
+			ORDER BY event_time DESC`,
 			idStudent, from, to)
 		if err != nil {
 			fmt.Println(err)
@@ -161,7 +162,8 @@ func (m MovementModel) GetMovementsForUser(idStudent, idEmployee int64, from tim
 			FROM barriers.moves m
 			JOIN barriers.events AS e ON e.id = m.id_event
 			JOIN barriers.buildings AS b ON b.id = m.id_building
-			WHERE m.id_employee = $1 AND (event_time >= $2 AND event_time <= $3)`,
+			WHERE m.id_employee = $1 AND (event_time >= $2 AND event_time <= $3)
+			ORDER BY event_time DESC`,
 			idEmployee, from, to)
 		if err != nil {
 			fmt.Println(err)
