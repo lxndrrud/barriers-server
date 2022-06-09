@@ -12,6 +12,23 @@ type MovementModel struct {
 	DB *sqlx.DB
 }
 
+func (m MovementModel) Insert(trx *sqlx.Tx, idBuilding, idEvent int64,
+	idEmployee, idStudent *int64) (int64, error) {
+	var id int64 = 0
+	err := trx.Get(&id, `INSERT INTO barriers.moves (id_building, id_event, id_student, id_employee, event_time) 
+			VALUES ($1, $2, $3, $4) RETURNING id`,
+		idBuilding, idEvent, idStudent, idEmployee, time.Now())
+	if err != nil {
+		err := trx.Rollback()
+		if err != nil {
+			return 0, err
+		}
+		return 0, err
+	}
+
+	return id, nil
+}
+
 func (m MovementModel) InsertForStudent(trx *sqlx.Tx, idBuilding int64, idEvent int64, idStudent int64) (int64, error) {
 	var id int64 = 0
 

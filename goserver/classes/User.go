@@ -52,7 +52,7 @@ type UserJSON struct {
 func CreateUserJSONFromStudent(student *Student) UserJSON {
 	return UserJSON{
 		Id:   student.Id,
-		Type: "student",
+		Type: "Студент",
 		UserJSONBase: UserJSONBase{
 			Firstname:  student.Firstname,
 			Lastname:   student.Lastname,
@@ -65,7 +65,7 @@ func CreateUserJSONFromStudent(student *Student) UserJSON {
 func CreateUserJSONFromEmployee(employee *Employee) UserJSON {
 	return UserJSON{
 		Id:   employee.Id,
-		Type: "employee",
+		Type: "Сотрудник",
 		UserJSONBase: UserJSONBase{
 			Firstname:  employee.Firstname,
 			Lastname:   employee.Lastname,

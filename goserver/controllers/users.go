@@ -12,11 +12,10 @@ import (
 
 type UsersController struct {
 	UsersService interface {
-		GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError)
-		GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployeePersonalInfo, []classes.JSONEmployeePositionInfo,
+		GetBySkudCard(SkudCard string) (classes.DBUser, *classes.CustomError)
+		GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployee,
 			*classes.CustomError)
-		GetStudentInfo(IdStudent int64) (classes.JSONStudentPersonalInfo,
-			[]classes.JSONStudentGroupInfo, *classes.CustomError)
+		GetStudentInfo(IdStudent int64) (classes.JSONStudent, *classes.CustomError)
 	}
 }
 
@@ -52,16 +51,13 @@ func (c UsersController) GetEmployeeInfo(ctx *gin.Context) {
 		})
 		return
 	}
-	personalInfo, positionsInfo, errService := c.UsersService.GetEmployeeInfo(idEmployee)
+	employee, errService := c.UsersService.GetEmployeeInfo(idEmployee)
 	if errService != nil {
 		ctx.JSON(errService.Code, errService.Text)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"employee":  personalInfo,
-		"positions": positionsInfo,
-	})
+	ctx.JSON(http.StatusOK, employee)
 }
 
 func (c UsersController) GetStudentInfo(ctx *gin.Context) {
@@ -72,14 +68,11 @@ func (c UsersController) GetStudentInfo(ctx *gin.Context) {
 		})
 		return
 	}
-	personalInfo, groupsInfo, errService := c.UsersService.GetStudentInfo(idStudent)
+	student, errService := c.UsersService.GetStudentInfo(idStudent)
 	if errService != nil {
 		ctx.JSON(errService.Code, errService.Text)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"student": personalInfo,
-		"groups":  groupsInfo,
-	})
+	ctx.JSON(http.StatusOK, student)
 }

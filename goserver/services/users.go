@@ -12,15 +12,15 @@ type UsersService struct {
 	db *sqlx.DB
 
 	students interface {
-		Get(id int64) (classes.DBStudentPersonalInfo, error)
-		GetBySkudCard(SkudCard string) (classes.Student, error)
-		GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo, error)
+		Get(id int64) (classes.DBUser, error)
+		GetBySkudCard(SkudCard string) (classes.DBUser, error)
+		GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo1, error)
 	}
 
 	employee interface {
-		Get(id int64) (classes.DBEmployeePersonalInfo, error)
-		GetBySkudCard(SkudCard string) (classes.Employee, error)
-		GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo, error)
+		Get(id int64) (classes.DBUser, error)
+		GetBySkudCard(SkudCard string) (classes.DBUser, error)
+		GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo1, error)
 	}
 }
 
@@ -32,9 +32,9 @@ func CreateUsersService(db *sqlx.DB) *UsersService {
 	}
 }
 
-func (s UsersService) GetBySkudCard(SkudCard string) (classes.UserJSON, *classes.CustomError) {
-	studentChan := make(chan classes.Student)
-	employeeChan := make(chan classes.Employee)
+func (s UsersService) GetBySkudCard(SkudCard string) (classes.DBUser, *classes.CustomError) {
+	studentChan := make(chan classes.DBUser)
+	employeeChan := make(chan classes.DBUser)
 	errChan := make(chan error)
 
 	go func() {
@@ -54,29 +54,28 @@ func (s UsersService) GetBySkudCard(SkudCard string) (classes.UserJSON, *classes
 	err := <-errChan
 
 	if err != nil {
-		return classes.UserJSON{}, &classes.CustomError{
+		return classes.DBUser{}, &classes.CustomError{
 			Text: err.Error(),
 			Code: http.StatusInternalServerError,
 		}
 	}
 
 	if student.Id != 0 {
-		return classes.CreateUserJSONFromStudent(&student), nil
+		return student, nil
 	} else if employee.Id != 0 {
-		return classes.CreateUserJSONFromEmployee(&employee), nil
+		return student, nil
 	} else {
-		return classes.UserJSON{}, nil
+		return classes.DBUser{}, nil
 	}
 
 }
 
-func (s UsersService) GetStudentInfo(IdStudent int64) (classes.JSONStudentPersonalInfo,
-	[]classes.JSONStudentGroupInfo, *classes.CustomError) {
-	personal := classes.JSONStudentPersonalInfo{}
-	groups := make([]classes.JSONStudentGroupInfo, 0)
+func (s UsersService) GetStudentInfo(IdStudent int64) (classes.JSONStudent, *classes.CustomError) {
+	personal := classes.DBUser{}
+	groups := make([]classes.DBStudentGroupInfo1, 0)
 
-	personalChan := make(chan classes.DBStudentPersonalInfo)
-	groupsChan := make(chan []classes.DBStudentGroupInfo)
+	personalChan := make(chan classes.DBUser)
+	groupsChan := make(chan []classes.DBStudentGroupInfo1)
 	errChan := make(chan error)
 
 	go func() {
@@ -91,31 +90,30 @@ func (s UsersService) GetStudentInfo(IdStudent int64) (classes.JSONStudentPerson
 		errChan <- err
 	}()
 
-	personalInfo := <-personalChan
-	groupsInfo := <-groupsChan
+	personal = <-personalChan
+	groups = <-groupsChan
 	err := <-errChan
 
 	if err != nil {
-		return personal, groups, &classes.CustomError{
+		return classes.JSONStudent{}, &classes.CustomError{
 			Code: 500,
 			Text: err.Error(),
 		}
 	}
 
-	personal = classes.CreateJSONStudentPersonalInfo(&personalInfo)
-	groups = classes.CreateJSONStudentGroupInfo(groupsInfo)
-
-	return personal, groups, nil
+	return classes.JSONStudent{
+		Student: personal,
+		Groups:  groups,
+	}, nil
 }
 
-func (s UsersService) GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployeePersonalInfo,
-	[]classes.JSONEmployeePositionInfo, *classes.CustomError) {
+func (s UsersService) GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployee, *classes.CustomError) {
 
-	personal := classes.JSONEmployeePersonalInfo{}
-	positions := make([]classes.JSONEmployeePositionInfo, 0)
+	personal := classes.DBUser{}
+	positions := make([]classes.DBEmployeePositionInfo1, 0)
 
-	personalChan := make(chan classes.DBEmployeePersonalInfo)
-	positionsChan := make(chan []classes.DBEmployeePositionInfo)
+	personalChan := make(chan classes.DBUser)
+	positionsChan := make(chan []classes.DBEmployeePositionInfo1)
 	errChan := make(chan error)
 
 	go func() {
@@ -130,19 +128,19 @@ func (s UsersService) GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployeePer
 		errChan <- err
 	}()
 
-	EmployeePersonalInfo := <-personalChan
-	EmployeePositionsInfo := <-positionsChan
+	personal = <-personalChan
+	positions = <-positionsChan
 	err := <-errChan
 
 	if err != nil {
-		return personal, positions, &classes.CustomError{
+		return classes.JSONEmployee{}, &classes.CustomError{
 			Code: 500,
 			Text: err.Error(),
 		}
 	}
 
-	personal = classes.CreateJSONEmployeePersonalInfo(&EmployeePersonalInfo)
-	positions = classes.CreateJSONEmployeePositionInfo(EmployeePositionsInfo)
-
-	return personal, positions, nil
+	return classes.JSONEmployee{
+		Employee:  personal,
+		Positions: positions,
+	}, nil
 }

@@ -11,37 +11,39 @@ type StudentModel struct {
 	DB *sqlx.DB
 }
 
-func (m StudentModel) Get(id int64) (classes.DBStudentPersonalInfo, error) {
-	var student classes.DBStudentPersonalInfo
+func (m StudentModel) Get(id int64) (classes.DBUser, error) {
+	var student classes.DBUser
 	err := m.DB.Get(
 		&student,
 		`SELECT id, firstname, middlename, lastname, skud_card FROM education.students 
 			WHERE id = $1`,
 		id)
 	if err != nil {
-		return classes.DBStudentPersonalInfo{}, err
+		return classes.DBUser{}, err
 	}
+	student.Type = "Студент"
 	return student, nil
 }
 
-func (m StudentModel) GetBySkudCard(SkudCard string) (classes.Student, error) {
-	var student classes.Student
+func (m StudentModel) GetBySkudCard(SkudCard string) (classes.DBUser, error) {
+	var student classes.DBUser
 	err := m.DB.Get(
 		&student,
 		`SELECT id, firstname, middlename, lastname, skud_card FROM education.students 
 			WHERE skud_card = $1`,
 		SkudCard)
 	if err == sql.ErrNoRows {
-		return classes.Student{}, nil
+		return classes.DBUser{}, nil
 	}
 	if err != nil {
-		return classes.Student{}, err
+		return classes.DBUser{}, err
 	}
+	student.Type = "Студент"
 	return student, nil
 }
 
-func (m StudentModel) GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo, error) {
-	groupsList := make([]classes.DBStudentGroupInfo, 0)
+func (m StudentModel) GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo1, error) {
+	groupsList := make([]classes.DBStudentGroupInfo1, 0)
 
 	err := m.DB.Select(
 		&groupsList,
