@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/AcuVuz/barriers-server/classes"
+	"github.com/AcuVuz/barriers-server/utils"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -12,12 +13,12 @@ type MovementModel struct {
 	DB *sqlx.DB
 }
 
-func (m MovementModel) Insert(trx *sqlx.Tx, idBuilding, idEvent int64,
-	idEmployee, idStudent *int64) (int64, error) {
+func (m MovementModel) Insert(trx *sqlx.Tx, idBuilding, idEvent,
+	idEmployee, idStudent int64) (int64, error) {
 	var id int64 = 0
 	err := trx.Get(&id, `INSERT INTO barriers.moves (id_building, id_event, id_student, id_employee, event_time) 
-			VALUES ($1, $2, $3, $4) RETURNING id`,
-		idBuilding, idEvent, idStudent, idEmployee, time.Now())
+			VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		idBuilding, idEvent, utils.NewNullInt(idStudent), utils.NewNullInt(idEmployee), time.Now())
 	if err != nil {
 		err := trx.Rollback()
 		if err != nil {

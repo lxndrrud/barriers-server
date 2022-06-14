@@ -19,7 +19,7 @@ func (m StudentModel) Get(id int64) (classes.DBUser, error) {
 			WHERE id = $1`,
 		id)
 	if err != nil {
-		return classes.DBUser{}, err
+		return student, err
 	}
 	student.Type = "Студент"
 	return student, nil
@@ -33,10 +33,10 @@ func (m StudentModel) GetBySkudCard(SkudCard string) (classes.DBUser, error) {
 			WHERE skud_card = $1`,
 		SkudCard)
 	if err == sql.ErrNoRows {
-		return classes.DBUser{}, nil
+		return student, nil
 	}
 	if err != nil {
-		return classes.DBUser{}, err
+		return student, err
 	}
 	student.Type = "Студент"
 	return student, nil

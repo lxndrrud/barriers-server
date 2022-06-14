@@ -33,6 +33,11 @@ func CreateUsersService(db *sqlx.DB) *UsersService {
 }
 
 func (s UsersService) GetBySkudCard(SkudCard string) (classes.DBUser, *classes.CustomError) {
+	if SkudCard == "guest" {
+		return classes.DBUser{
+			Id: -1,
+		}, nil
+	}
 	studentChan := make(chan classes.DBUser)
 	employeeChan := make(chan classes.DBUser)
 	errChan := make(chan error)

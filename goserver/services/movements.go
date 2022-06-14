@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,8 +18,7 @@ type MovementsService struct {
 	}
 	movements interface {
 		GetMovements(from time.Time, to time.Time) ([]classes.DatabaseMovement, error)
-		Insert(trx *sqlx.Tx, idBuilding, idEvent int64,
-			idEmployee, idStudent *int64) (int64, error)
+		Insert(trx *sqlx.Tx, idBuilding, idEvent, idEmployee, idStudent int64) (int64, error)
 		InsertForStudent(trx *sqlx.Tx, idBuilding int64, idEvent int64, idStudent int64) (int64, error)
 		InsertForEmployee(trx *sqlx.Tx, idBuilding int64, idEvent int64, idEmployee int64) (int64, error)
 		//GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error)
@@ -72,24 +72,56 @@ func (s MovementsService) MovementAction(idBuilding int64, event string, skudCar
 		}
 	}
 
-	if user.Id == 0 {
-
+	// Обработчик Гостя - пользователя без карты
+	if user.Id == -1 {
+		fmt.Println("here гость")
+		_, err := s.movements.Insert(trx, idBuilding, idEvent, 0, 0)
+		if err != nil {
+			errTrx = trx.Rollback()
+			if errTrx != nil {
+				return &classes.CustomError{
+					Text: errTrx.Error(),
+					Code: http.StatusInternalServerError,
+				}
+			}
+			return &classes.CustomError{
+				Text: err.Error(),
+				Code: http.StatusInternalServerError,
+			}
+		}
+		// Обработчик студента
 	} else if user.Type == "Студент" {
-		_, err := s.movements.InsertForStudent(trx, idBuilding, idEvent, user.Id)
+		_, err := s.movements.Insert(trx, idBuilding, idEvent, 0, user.Id)
 		if err != nil {
+			errTrx = trx.Rollback()
+			if errTrx != nil {
+				return &classes.CustomError{
+					Text: errTrx.Error(),
+					Code: http.StatusInternalServerError,
+				}
+			}
 			return &classes.CustomError{
 				Text: err.Error(),
 				Code: http.StatusInternalServerError,
 			}
 		}
+		// Обработчик сотрудника
 	} else if user.Type == "Сотрудник" {
-		_, err := s.movements.InsertForEmployee(trx, idBuilding, idEvent, user.Id)
+		_, err := s.movements.Insert(trx, idBuilding, idEvent, user.Id, 0)
 		if err != nil {
+			errTrx = trx.Rollback()
+			if errTrx != nil {
+				return &classes.CustomError{
+					Text: errTrx.Error(),
+					Code: http.StatusInternalServerError,
+				}
+			}
 			return &classes.CustomError{
 				Text: err.Error(),
 				Code: http.StatusInternalServerError,
 			}
 		}
+		// Обработчик неправильного типа человека
 	} else {
 		errTrx = trx.Rollback()
 		if errTrx != nil {

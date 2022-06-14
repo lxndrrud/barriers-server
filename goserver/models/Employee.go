@@ -21,7 +21,7 @@ func (m EmployeeModel) Get(id int64) (classes.DBUser, error) {
 		id)
 
 	if err != nil {
-		return classes.DBUser{}, err
+		return employee, err
 	}
 	employee.Type = "Сотрудник"
 	return employee, nil
@@ -32,14 +32,20 @@ func (m EmployeeModel) GetBySkudCard(SkudCard string) (classes.DBUser, error) {
 
 	err := m.DB.Get(
 		&employee,
-		`SELECT id, firstname as lastname, name as firstname, lastname as middlename, skud_card FROM pers."Persons"
-			WHERE skud_card = $1`,
+		`SELECT pers.id, pers.firstname as lastname, pers.name as firstname, 
+			pers.lastname as middlename, pers.skud_card 
+			FROM pers."Persons" AS pers
+			WHERE skud_card = $1 AND dep.name_department != "Уволенные сотрудники"
+			JOIN pers."PersonsPosition" AS perspos ON perspos.id_person = pers.id
+			JOIN pers."Position" AS pos ON pos.id = perspos.id_position
+			JOIN pers."Departments" AS dep ON dep.id = pos.id_department
+			`,
 		SkudCard)
 	if err == sql.ErrNoRows {
-		return classes.DBUser{}, nil
+		return employee, nil
 	}
 	if err != nil {
-		return classes.DBUser{}, err
+		return employee, err
 	}
 	employee.Type = "Сотрудник"
 	return employee, nil

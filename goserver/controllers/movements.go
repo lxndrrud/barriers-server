@@ -147,5 +147,4 @@ func (c MovementsController) GetMovementsForUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, movements)
-
 }
