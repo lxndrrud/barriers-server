@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -19,10 +18,6 @@ type MovementsService struct {
 	movements interface {
 		GetMovements(from time.Time, to time.Time) ([]classes.DatabaseMovement, error)
 		Insert(trx *sqlx.Tx, idBuilding, idEvent, idEmployee, idStudent int64) (int64, error)
-		InsertForStudent(trx *sqlx.Tx, idBuilding int64, idEvent int64, idStudent int64) (int64, error)
-		InsertForEmployee(trx *sqlx.Tx, idBuilding int64, idEvent int64, idEmployee int64) (int64, error)
-		//GetMovementsForEmployee(idEmployee int64, from time.Time, to time.Time) ([]classes.DatabaseEmployeeMovement, error)
-		//GetMovementsForStudent(idStudent int64, from time.Time, to time.Time) ([]classes.DatabaseStudentMovement, error)
 		GetMovementsForUser(idStudent, idEmployee int64, from time.Time, to time.Time) ([]classes.Movement, error)
 	}
 }
@@ -74,7 +69,6 @@ func (s MovementsService) MovementAction(idBuilding int64, event string, skudCar
 
 	// Обработчик Гостя - пользователя без карты
 	if user.Id == -1 {
-		fmt.Println("here гость")
 		_, err := s.movements.Insert(trx, idBuilding, idEvent, 0, 0)
 		if err != nil {
 			errTrx = trx.Rollback()
@@ -166,17 +160,6 @@ func (s MovementsService) GetMovements(from string, to string) ([]classes.JSONMo
 	}
 
 	for _, movement := range movements {
-		/*
-			movementsJSON = append(movementsJSON, classes.MovementJSON{
-				Id:             movement.Id,
-				IdBuilding:     movement.IdBuilding,
-				IdEvent:        movement.IdEvent,
-				EventName:      movement.EventName,
-				EventTimestamp: movement.EventTimestamp,
-				IdStudent:      movement.IdStudent.Int64,
-				IdEmployee:     movement.IdEmployee.Int64,
-			})
-		*/
 		toAppend := classes.CreateJSONMovementFromDatabaseMovement(&movement)
 		if toAppend.Id != 0 {
 			movementsJSON = append(movementsJSON, classes.CreateJSONMovementFromDatabaseMovement(&movement))
@@ -185,63 +168,6 @@ func (s MovementsService) GetMovements(from string, to string) ([]classes.JSONMo
 
 	return movementsJSON, nil
 }
-
-/*
-func (s MovementsService) GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError) {
-	movements := make([]classes.JSONEmployeeMovement, 0)
-
-	dateUtil := &utils.Dates{}
-
-	now := time.Now()
-	parsedFrom := dateUtil.ParseWithDefault(from, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
-	parsedTo := dateUtil.ParseWithDefault(to, now.AddDate(0, 0, 1))
-
-	dateUtil = nil
-
-	DBmovements, err := s.movements.GetMovementsForEmployee(idEmployee, parsedFrom, parsedTo)
-	if err != nil {
-		return movements, &classes.CustomError{
-			Text: "Внутренняя ошибка сервера при поиске перемещений для работника!",
-			Code: http.StatusInternalServerError,
-		}
-	}
-
-	for _, movement := range DBmovements {
-		movements = append(movements, classes.CreateJSONFromEmployeeMovement(&movement))
-	}
-
-	return movements, nil
-}
-
-func (s MovementsService) GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError) {
-	movements := make([]classes.JSONStudentMovement, 0)
-
-	var parsedFrom time.Time
-	var parsedTo time.Time
-
-	dateUtil := &utils.Dates{}
-
-	now := time.Now()
-	parsedFrom = dateUtil.ParseWithDefault(from, time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
-	parsedTo = dateUtil.ParseWithDefault(to, now.AddDate(0, 0, 1))
-
-	dateUtil = nil
-
-	DBmovements, err := s.movements.GetMovementsForStudent(idStudent, parsedFrom, parsedTo)
-	if err != nil {
-		return movements, &classes.CustomError{
-			Text: "Внутренняя ошибка сервера при поиске перемещений для студента!",
-			Code: http.StatusInternalServerError,
-		}
-	}
-
-	for _, movement := range DBmovements {
-		movements = append(movements, classes.CreateJSONFromStudentMovement(&movement))
-	}
-
-	return movements, nil
-}
-*/
 
 func (s MovementsService) GetMovementsForUser(idEmployee, idStudent int64, from, to string) ([]classes.MovementJSON, *classes.CustomError) {
 	movements := make([]classes.MovementJSON, 0)

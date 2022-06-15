@@ -152,6 +152,24 @@ func CreateJSONMovementFromDatabaseMovement(dbMovement *DatabaseMovement) JSONMo
 				SkudCard:   dbMovement.EmployeeBase.SkudCard.String,
 			},
 		}
+	} else {
+		return JSONMovement{
+			MovementJSON: MovementJSON{
+				Id:             dbMovement.Id,
+				IdEvent:        dbMovement.IdEvent,
+				IdBuilding:     dbMovement.IdBuilding,
+				BuildingName:   dbMovement.BuildingName,
+				IdStudent:      0,
+				IdEmployee:     0,
+				EventName:      dbMovement.EventName,
+				EventTimestamp: dbMovement.EventTimestamp,
+			},
+			UserJSONBase: UserJSONBase{
+				Firstname:  "Гость",
+				Middlename: "Гость",
+				Lastname:   "Гость",
+				SkudCard:   "Отсутствует",
+			},
+		}
 	}
-	return JSONMovement{}
 }
