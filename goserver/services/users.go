@@ -14,13 +14,13 @@ type UsersService struct {
 	students interface {
 		Get(id int64) (classes.DBUser, error)
 		GetBySkudCard(SkudCard string) (classes.DBUser, error)
-		GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo1, error)
+		GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo, error)
 	}
 
 	employee interface {
 		Get(id int64) (classes.DBUser, error)
 		GetBySkudCard(SkudCard string) (classes.DBUser, error)
-		GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo1, error)
+		GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo, error)
 	}
 }
 
@@ -77,10 +77,10 @@ func (s UsersService) GetBySkudCard(SkudCard string) (classes.DBUser, *classes.C
 
 func (s UsersService) GetStudentInfo(IdStudent int64) (classes.JSONStudent, *classes.CustomError) {
 	personal := classes.DBUser{}
-	groups := make([]classes.DBStudentGroupInfo1, 0)
+	groups := make([]classes.DBStudentGroupInfo, 0)
 
 	personalChan := make(chan classes.DBUser)
-	groupsChan := make(chan []classes.DBStudentGroupInfo1)
+	groupsChan := make(chan []classes.DBStudentGroupInfo)
 	errChan := make(chan error)
 
 	go func() {
@@ -115,10 +115,10 @@ func (s UsersService) GetStudentInfo(IdStudent int64) (classes.JSONStudent, *cla
 func (s UsersService) GetEmployeeInfo(IdEmployee int64) (classes.JSONEmployee, *classes.CustomError) {
 
 	personal := classes.DBUser{}
-	positions := make([]classes.DBEmployeePositionInfo1, 0)
+	positions := make([]classes.DBEmployeePositionInfo, 0)
 
 	personalChan := make(chan classes.DBUser)
-	positionsChan := make(chan []classes.DBEmployeePositionInfo1)
+	positionsChan := make(chan []classes.DBEmployeePositionInfo)
 	errChan := make(chan error)
 
 	go func() {

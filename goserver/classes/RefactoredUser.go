@@ -7,11 +7,11 @@ import (
 )
 
 type DBUser struct {
-	Id         int64          `db:"id" json:"id"`
-	Firstname  string         `db:"firstname" json:"firstname"`
-	Middlename string         `db:"middlename" json:"middlename"`
-	Lastname   string         `db:"lastname" json:"lastname"`
-	DBSkudCard sql.NullString `db:"skud_card" json:"-"`
+	Id         int64          `db:"id"`
+	Firstname  string         `db:"firstname"`
+	Middlename string         `db:"middlename"`
+	Lastname   string         `db:"lastname"`
+	DBSkudCard sql.NullString `db:"skud_card"`
 	Type       string         `json:"type"`
 }
 
@@ -34,21 +34,21 @@ func (c DBUser) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-type DBStudentGroupInfo1 struct {
+type DBStudentGroupInfo struct {
 	Id              int64  `db:"id" json:"id"`
 	Title           string `db:"title" json:"title"`
 	Course          string `db:"course" json:"course"`
 	DepartmentTitle string `db:"department_title" json:"department_title"`
 }
 
-type DBEmployeePositionInfo1 struct {
-	Id              int64          `db:"id" json:"id"`
-	Title           string         `db:"title" json:"title"`
-	DepartmentTitle string         `db:"department_title" json:"department_title"`
+type DBEmployeePositionInfo struct {
+	Id              int64          `db:"id"`
+	Title           string         `db:"title"`
+	DepartmentTitle string         `db:"department_title"`
 	DBDateDrop      sql.NullString `db:"date_drop"`
 }
 
-func (c DBEmployeePositionInfo1) MarshalJSON() ([]byte, error) {
+func (c DBEmployeePositionInfo) MarshalJSON() ([]byte, error) {
 	var dateDrop string
 	if c.DBDateDrop.Valid {
 		dateDrop = c.DBDateDrop.String
@@ -65,11 +65,11 @@ func (c DBEmployeePositionInfo1) MarshalJSON() ([]byte, error) {
 }
 
 type JSONEmployee struct {
-	Employee  DBUser                    `json:"employee"`
-	Positions []DBEmployeePositionInfo1 `json:"positions"`
+	Employee  DBUser                   `json:"employee"`
+	Positions []DBEmployeePositionInfo `json:"positions"`
 }
 
 type JSONStudent struct {
-	Student DBUser                `json:"student"`
-	Groups  []DBStudentGroupInfo1 `json:"groups"`
+	Student DBUser               `json:"student"`
+	Groups  []DBStudentGroupInfo `json:"groups"`
 }

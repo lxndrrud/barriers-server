@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,10 +14,10 @@ import (
 type MovementsController struct {
 	MovementsService interface {
 		MovementAction(idBuilding int64, event string, skudCard string) *classes.CustomError
-		GetMovements(from string, to string) ([]classes.JSONMovement, *classes.CustomError)
+		GetMovements(idBuilding int64, from string, to string) ([]classes.JSONMovement, *classes.CustomError)
 		//GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError)
 		//GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError)
-		GetMovementsForUser(idEmployee, idStudent int64, from, to string) ([]classes.MovementJSON, *classes.CustomError)
+		GetMovementsForUser(idBuilding, idEmployee, idStudent int64, from, to string) ([]classes.MovementJSON, *classes.CustomError)
 	}
 }
 
@@ -58,8 +59,13 @@ func (c MovementsController) MovementAction(ctx *gin.Context) {
 func (c MovementsController) GetMovements(ctx *gin.Context) {
 	from := ctx.Query("from")
 	to := ctx.Query("to")
+	idBuilding, err := strconv.ParseInt(ctx.Query("id_building"), 10, 64)
+	fmt.Println(idBuilding, err)
+	if err != nil {
+		idBuilding = 0
+	}
 
-	movementsQuery, errService := c.MovementsService.GetMovements(from, to)
+	movementsQuery, errService := c.MovementsService.GetMovements(idBuilding, from, to)
 	if errService != nil {
 		ctx.JSON(errService.Code, gin.H{
 			"error": errService.Text,
@@ -128,6 +134,10 @@ func (c MovementsController) GetMovementsForStudent(ctx *gin.Context) {
 func (c MovementsController) GetMovementsForUser(ctx *gin.Context) {
 	from := ctx.Query("from")
 	to := ctx.Query("to")
+	idBuilding, err := strconv.ParseInt(ctx.Query("id_building"), 10, 64)
+	if err != nil {
+		idBuilding = 0
+	}
 
 	idStudent, err := strconv.ParseInt(ctx.Query("id_student"), 10, 64)
 	if err != nil {
@@ -139,7 +149,8 @@ func (c MovementsController) GetMovementsForUser(ctx *gin.Context) {
 		idEmployee = 0
 	}
 
-	movements, errService := c.MovementsService.GetMovementsForUser(idEmployee, idStudent, from, to)
+	movements, errService := c.MovementsService.
+		GetMovementsForUser(idBuilding, idEmployee, idStudent, from, to)
 	if errService != nil {
 		ctx.JSON(errService.Code, errService.Text)
 		errService = nil

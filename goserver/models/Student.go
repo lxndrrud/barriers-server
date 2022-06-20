@@ -42,8 +42,8 @@ func (m StudentModel) GetBySkudCard(SkudCard string) (classes.DBUser, error) {
 	return student, nil
 }
 
-func (m StudentModel) GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo1, error) {
-	groupsList := make([]classes.DBStudentGroupInfo1, 0)
+func (m StudentModel) GetGroupsInfo(IdStudent int64) ([]classes.DBStudentGroupInfo, error) {
+	groupsList := make([]classes.DBStudentGroupInfo, 0)
 
 	err := m.DB.Select(
 		&groupsList,

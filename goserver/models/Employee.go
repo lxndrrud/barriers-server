@@ -51,8 +51,8 @@ func (m EmployeeModel) GetBySkudCard(SkudCard string) (classes.DBUser, error) {
 	return employee, nil
 }
 
-func (m EmployeeModel) GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo1, error) {
-	positionsInfo := make([]classes.DBEmployeePositionInfo1, 0)
+func (m EmployeeModel) GetPositionsInfo(IdEmployee int64) ([]classes.DBEmployeePositionInfo, error) {
+	positionsInfo := make([]classes.DBEmployeePositionInfo, 0)
 
 	err := m.DB.Select(
 		&positionsInfo,
