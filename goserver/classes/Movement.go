@@ -2,174 +2,94 @@ package classes
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 )
 
 type Movement struct {
-	Id             int64         `db:"id" json:"id"`
-	IdBuilding     int64         `db:"id_building" json:"id_building"`
-	BuildingName   string        `db:"building_name" json:"building_name"`
-	IdEvent        int64         `db:"id_event" json:"id_event"`
-	EventName      string        `db:"event_name" json:"event_name"`
-	EventTimestamp time.Time     `db:"event_time" json:"event_timestamp"`
-	IdStudent      sql.NullInt64 `db:"id_student" json:"id_student"`
-	IdEmployee     sql.NullInt64 `db:"id_employee" json:"id_employee"`
+	Id             int64         `db:"id"`
+	IdBuilding     int64         `db:"id_building"`
+	BuildingName   string        `db:"building_name"`
+	IdEvent        int64         `db:"id_event"`
+	EventName      string        `db:"event_name"`
+	EventTimestamp time.Time     `db:"event_time"`
+	IdStudent      sql.NullInt64 `db:"id_student"`
+	IdEmployee     sql.NullInt64 `db:"id_employee"`
 }
 
-type MovementJSON struct {
-	Id             int64     `json:"id"`
-	IdBuilding     int64     `json:"id_building"`
-	BuildingName   string    `json:"building_name"`
-	IdEvent        int64     `json:"id_event"`
-	EventName      string    `json:"event_name"`
-	EventTimestamp time.Time `json:"event_timestamp"`
-	IdStudent      int64     `json:"id_student"`
-	IdEmployee     int64     `json:"id_employee"`
+func (c Movement) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]any{
+		"id":              c.Id,
+		"id_building":     c.IdBuilding,
+		"id_event":        c.IdEvent,
+		"building_name":   c.BuildingName,
+		"event_name":      c.EventName,
+		"event_timestamp": c.EventTimestamp,
+		"id_student":      c.IdStudent.Int64,
+		"id_employee":     c.IdEmployee.Int64,
+	})
 }
 
-func CreateJSONFromMovement(dbMovement *Movement) MovementJSON {
-	return MovementJSON{
-		Id:             dbMovement.Id,
-		IdBuilding:     dbMovement.IdBuilding,
-		BuildingName:   dbMovement.BuildingName,
-		IdEvent:        dbMovement.IdEvent,
-		EventName:      dbMovement.EventName,
-		EventTimestamp: dbMovement.EventTimestamp,
-		IdStudent:      dbMovement.IdStudent.Int64,
-		IdEmployee:     dbMovement.IdEmployee.Int64,
-	}
+type EmployeeShort struct {
+	Firstname  sql.NullString `db:"employee_firstname" json:"employee_firstname"`
+	Middlename sql.NullString `db:"employee_middlename" json:"employee_middlename"`
+	Lastname   sql.NullString `db:"employee_lastname" json:"employee_lastname"`
+	SkudCard   sql.NullString `db:"employee_skud_card" json:"employee_skud_card"`
 }
 
-type DatabaseStudentMovement struct {
-	Movement
-	UserBase
-}
-
-type JSONStudentMovement struct {
-	MovementJSON
-	UserJSONBase
-}
-
-func CreateJSONFromStudentMovement(dbMovement *DatabaseStudentMovement) JSONStudentMovement {
-	return JSONStudentMovement{
-		UserJSONBase: UserJSONBase{
-			Firstname:  dbMovement.Firstname,
-			Middlename: dbMovement.Middlename,
-			Lastname:   dbMovement.Lastname,
-			SkudCard:   dbMovement.SkudCard.String,
-		},
-		MovementJSON: MovementJSON{
-			Id:             dbMovement.Id,
-			IdEvent:        dbMovement.IdEvent,
-			IdBuilding:     dbMovement.IdBuilding,
-			BuildingName:   dbMovement.BuildingName,
-			IdStudent:      0,
-			IdEmployee:     dbMovement.IdEmployee.Int64,
-			EventName:      dbMovement.EventName,
-			EventTimestamp: dbMovement.EventTimestamp,
-		},
-	}
-}
-
-type DatabaseEmployeeMovement struct {
-	Movement
-	UserBase
-}
-
-type JSONEmployeeMovement struct {
-	MovementJSON
-	UserJSONBase
-}
-
-func CreateJSONFromEmployeeMovement(dbMovement *DatabaseEmployeeMovement) JSONEmployeeMovement {
-	return JSONEmployeeMovement{
-		UserJSONBase: UserJSONBase{
-			Firstname:  dbMovement.Firstname,
-			Middlename: dbMovement.Middlename,
-			Lastname:   dbMovement.Lastname,
-			SkudCard:   dbMovement.SkudCard.String,
-		},
-		MovementJSON: MovementJSON{
-			Id:             dbMovement.Id,
-			IdEvent:        dbMovement.IdEvent,
-			IdBuilding:     dbMovement.IdBuilding,
-			BuildingName:   dbMovement.BuildingName,
-			IdStudent:      0,
-			IdEmployee:     dbMovement.IdEmployee.Int64,
-			EventName:      dbMovement.EventName,
-			EventTimestamp: dbMovement.EventTimestamp,
-		},
-	}
+type StudentShort struct {
+	Firstname  sql.NullString `db:"student_firstname" json:"student_firstname"`
+	Middlename sql.NullString `db:"student_middlename" json:"student_middlename"`
+	Lastname   sql.NullString `db:"student_lastname" json:"student_lastname"`
+	SkudCard   sql.NullString `db:"student_skud_card" json:"student_skud_card"`
 }
 
 type DatabaseMovement struct {
 	Movement
-	EmployeeBase
-	StudentBase
+	EmployeeShort
+	StudentShort
 }
 
-type JSONMovement struct {
-	MovementJSON
-	UserJSONBase
-}
+func (c DatabaseMovement) MarshalJSON() ([]byte, error) {
+	student := make(map[string]any)
+	employee := make(map[string]any)
+	movement := make(map[string]any)
 
-func CreateJSONMovementFromDatabaseMovement(dbMovement *DatabaseMovement) JSONMovement {
-	if dbMovement.IdStudent.Valid {
-		return JSONMovement{
-			MovementJSON: MovementJSON{
-				Id:             dbMovement.Id,
-				IdEvent:        dbMovement.IdEvent,
-				IdBuilding:     dbMovement.IdBuilding,
-				BuildingName:   dbMovement.BuildingName,
-				IdStudent:      dbMovement.IdStudent.Int64,
-				IdEmployee:     0,
-				EventName:      dbMovement.EventName,
-				EventTimestamp: dbMovement.EventTimestamp,
-			},
-			UserJSONBase: UserJSONBase{
-				Firstname:  dbMovement.StudentBase.Firstname.String,
-				Middlename: dbMovement.StudentBase.Middlename.String,
-				Lastname:   dbMovement.StudentBase.Lastname.String,
-				SkudCard:   dbMovement.StudentBase.SkudCard.String,
-			},
+	movement = map[string]any{
+		"id":              c.Movement.Id,
+		"id_building":     c.Movement.IdBuilding,
+		"id_event":        c.Movement.IdEvent,
+		"building_name":   c.Movement.BuildingName,
+		"event_name":      c.Movement.EventName,
+		"event_timestamp": c.Movement.EventTimestamp,
+		"id_student":      c.Movement.IdStudent.Int64,
+		"id_employee":     c.Movement.IdEmployee.Int64,
+	}
+
+	if c.Movement.IdStudent.Valid {
+		student = map[string]any{
+			"id":         c.Movement.IdStudent.Int64,
+			"firstname":  c.StudentShort.Firstname.String,
+			"middlename": c.StudentShort.Middlename.String,
+			"lastname":   c.StudentShort.Lastname.String,
+			"skud_card":  c.StudentShort.SkudCard.String,
 		}
-	} else if dbMovement.IdEmployee.Valid {
-		return JSONMovement{
-			MovementJSON: MovementJSON{
-				Id:             dbMovement.Id,
-				IdEvent:        dbMovement.IdEvent,
-				IdBuilding:     dbMovement.IdBuilding,
-				BuildingName:   dbMovement.BuildingName,
-				IdStudent:      0,
-				IdEmployee:     dbMovement.IdEmployee.Int64,
-				EventName:      dbMovement.EventName,
-				EventTimestamp: dbMovement.EventTimestamp,
-			},
-			UserJSONBase: UserJSONBase{
-				Firstname:  dbMovement.EmployeeBase.Firstname.String,
-				Middlename: dbMovement.EmployeeBase.Middlename.String,
-				Lastname:   dbMovement.EmployeeBase.Lastname.String,
-				SkudCard:   dbMovement.EmployeeBase.SkudCard.String,
-			},
-		}
+		return json.Marshal(map[string]map[string]any{
+			"user":     student,
+			"movement": movement,
+		})
+		// if c.Movement.IdEmployee.Valid
 	} else {
-		return JSONMovement{
-			MovementJSON: MovementJSON{
-				Id:             dbMovement.Id,
-				IdEvent:        dbMovement.IdEvent,
-				IdBuilding:     dbMovement.IdBuilding,
-				BuildingName:   dbMovement.BuildingName,
-				IdStudent:      0,
-				IdEmployee:     0,
-				EventName:      dbMovement.EventName,
-				EventTimestamp: dbMovement.EventTimestamp,
-			},
-			UserJSONBase: UserJSONBase{
-				Firstname:  "Гость",
-				Middlename: "Гость",
-				Lastname:   "Гость",
-				SkudCard:   "Отсутствует",
-			},
+		employee = map[string]any{
+			"id":         c.Movement.IdEmployee.Int64,
+			"firstname":  c.EmployeeShort.Firstname.String,
+			"middlename": c.EmployeeShort.Middlename.String,
+			"lastname":   c.EmployeeShort.Lastname.String,
+			"skud_card":  c.EmployeeShort.SkudCard.String,
 		}
+		return json.Marshal(map[string]map[string]any{
+			"user":     employee,
+			"movement": movement,
+		})
 	}
 }

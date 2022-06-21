@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,10 +13,12 @@ import (
 type MovementsController struct {
 	MovementsService interface {
 		MovementAction(idBuilding int64, event string, skudCard string) *classes.CustomError
-		GetMovements(idBuilding int64, from string, to string) ([]classes.JSONMovement, *classes.CustomError)
+		GetMovements(idBuilding int64,
+			from string, to string) ([]classes.DatabaseMovement, *classes.CustomError)
 		//GetMovementsForEmployee(idEmployee int64, from string, to string) ([]classes.JSONEmployeeMovement, *classes.CustomError)
 		//GetMovementsForStudent(idStudent int64, from string, to string) ([]classes.JSONStudentMovement, *classes.CustomError)
-		GetMovementsForUser(idBuilding, idEmployee, idStudent int64, from, to string) ([]classes.MovementJSON, *classes.CustomError)
+		GetMovementsForUser(idBuilding, idEmployee, idStudent int64,
+			from, to string) ([]classes.Movement, *classes.CustomError)
 	}
 }
 
@@ -60,7 +61,6 @@ func (c MovementsController) GetMovements(ctx *gin.Context) {
 	from := ctx.Query("from")
 	to := ctx.Query("to")
 	idBuilding, err := strconv.ParseInt(ctx.Query("id_building"), 10, 64)
-	fmt.Println(idBuilding, err)
 	if err != nil {
 		idBuilding = 0
 	}

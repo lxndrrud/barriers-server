@@ -1,76 +1,75 @@
 package classes
 
-import "database/sql"
+import (
+	"database/sql"
+	"encoding/json"
+	"strconv"
+)
 
-type UserBase struct {
+type DBUser struct {
+	Id         int64          `db:"id"`
 	Firstname  string         `db:"firstname"`
 	Middlename string         `db:"middlename"`
 	Lastname   string         `db:"lastname"`
-	SkudCard   sql.NullString `db:"skud_card"`
+	DBSkudCard sql.NullString `db:"skud_card"`
+	Type       string         `json:"type"`
 }
 
-type EmployeeBase struct {
-	Firstname  sql.NullString `db:"employee_firstname"`
-	Middlename sql.NullString `db:"employee_middlename"`
-	Lastname   sql.NullString `db:"employee_lastname"`
-	SkudCard   sql.NullString `db:"employee_skud_card"`
-}
-
-type StudentBase struct {
-	Firstname  sql.NullString `db:"student_firstname"`
-	Middlename sql.NullString `db:"student_middlename"`
-	Lastname   sql.NullString `db:"student_lastname"`
-	SkudCard   sql.NullString `db:"student_skud_card"`
-}
-
-type UserJSONBase struct {
-	Firstname  string `json:"firstname"`
-	Middlename string `json:"middlename"`
-	Lastname   string `json:"lastname"`
-	SkudCard   string `json:"skud_card"`
-}
-
-type User struct {
-	Id int64 `db:"id"`
-	UserBase
-}
-
-type Student struct {
-	User
-}
-
-type Employee struct {
-	User
-}
-
-type UserJSON struct {
-	Id   int64  `json:"id"`
-	Type string `json:"type"`
-	UserJSONBase
-}
-
-func CreateUserJSONFromStudent(student *Student) UserJSON {
-	return UserJSON{
-		Id:   student.Id,
-		Type: "Студент",
-		UserJSONBase: UserJSONBase{
-			Firstname:  student.Firstname,
-			Lastname:   student.Lastname,
-			Middlename: student.Middlename,
-			SkudCard:   student.SkudCard.String,
-		},
+func (c DBUser) MarshalJSON() ([]byte, error) {
+	var skudCard string
+	if c.DBSkudCard.Valid {
+		skudCard = c.DBSkudCard.String
+	} else {
+		skudCard = ""
 	}
+	m := map[string]string{
+		"id":         strconv.FormatInt(c.Id, 10),
+		"firstname":  c.Firstname,
+		"middlename": c.Middlename,
+		"lastname":   c.Lastname,
+		"skud_card":  skudCard,
+		"type":       c.Type,
+	}
+
+	return json.Marshal(m)
 }
 
-func CreateUserJSONFromEmployee(employee *Employee) UserJSON {
-	return UserJSON{
-		Id:   employee.Id,
-		Type: "Сотрудник",
-		UserJSONBase: UserJSONBase{
-			Firstname:  employee.Firstname,
-			Lastname:   employee.Lastname,
-			Middlename: employee.Middlename,
-			SkudCard:   employee.SkudCard.String,
-		},
+type DBStudentGroupInfo struct {
+	Id              int64  `db:"id" json:"id"`
+	Title           string `db:"title" json:"title"`
+	Course          string `db:"course" json:"course"`
+	DepartmentTitle string `db:"department_title" json:"department_title"`
+}
+
+type DBEmployeePositionInfo struct {
+	Id              int64          `db:"id"`
+	Title           string         `db:"title"`
+	DepartmentTitle string         `db:"department_title"`
+	DBDateDrop      sql.NullString `db:"date_drop"`
+}
+
+func (c DBEmployeePositionInfo) MarshalJSON() ([]byte, error) {
+	var dateDrop string
+	if c.DBDateDrop.Valid {
+		dateDrop = c.DBDateDrop.String
+	} else {
+		dateDrop = "Все еще работает"
 	}
+	m := map[string]string{
+		"id":               strconv.FormatInt(c.Id, 10),
+		"title":            c.Title,
+		"department_title": c.DepartmentTitle,
+		"date_drop":        dateDrop,
+	}
+	return json.Marshal(m)
+}
+
+type JSONEmployee struct {
+	Employee  DBUser                   `json:"employee"`
+	Positions []DBEmployeePositionInfo `json:"positions"`
+}
+
+type JSONStudent struct {
+	Student DBUser               `json:"student"`
+	Groups  []DBStudentGroupInfo `json:"groups"`
 }

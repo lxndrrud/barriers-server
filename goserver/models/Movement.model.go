@@ -31,7 +31,7 @@ func (m MovementModel) Insert(trx *sqlx.Tx, idBuilding, idEvent,
 }
 
 func (m MovementModel) GetMovements(from time.Time, to time.Time) ([]classes.DatabaseMovement, error) {
-	var movements []classes.DatabaseMovement
+	movements := make([]classes.DatabaseMovement, 0)
 
 	err := m.DB.Select(
 		&movements,
@@ -59,7 +59,7 @@ func (m MovementModel) GetMovements(from time.Time, to time.Time) ([]classes.Dat
 func (m MovementModel) GetMovementsForBuilding(idBuilding int64, from time.Time,
 	to time.Time) ([]classes.DatabaseMovement, error) {
 
-	var movements []classes.DatabaseMovement
+	movements := make([]classes.DatabaseMovement, 0)
 
 	err := m.DB.Select(
 		&movements,
