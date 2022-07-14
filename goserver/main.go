@@ -10,7 +10,7 @@ import (
 
 func main() {
 	db, err := sqlx.Connect("postgres",
-		"host=db-jmu user=dbjmu password=Afgihn215zxdg dbname=jmu sslmode=disable")
+		"host=test user=test password=test dbname=test sslmode=disable")
 	if err != nil {
 		log.Fatalln(err)
 	}
